@@ -1,0 +1,45 @@
+# added by [X] LLM model
+# Example chat log for testing
+# Format: timestamp_ms|username|message
+
+# Baseline activity
+1700000000000|user1|hello
+1700000001000|user2|how is everyone doing
+1700000002000|user3|good stream today
+1700000003000|user4|yeah loving it
+1700000004000|user5|nice plays
+
+# Win moment - spike with W keywords
+1700000100000|user1|W
+1700000100100|user2|WW
+1700000100200|user3|WWW
+1700000100300|user4|PogChamp
+1700000100400|user5|insane
+1700000100500|user6|clutch
+1700000100600|user7|ez
+1700000100700|user8|W
+1700000100800|user9|pog
+1700000100900|user10|GG
+
+# Cooldown period
+1700000200000|user1|that was crazy
+1700000201000|user2|yeah wild
+1700000202000|user3|good game
+
+# Loss moment - L keywords
+1700000300000|user1|L
+1700000300100|user2|ff
+1700000300200|user3|sad
+1700000300300|user4|unlucky
+1700000300400|user5|rip
+1700000300500|user6|L
+1700000300600|user7|oof
+1700000300700|user8|L
+
+# Hype moment with emotes
+1700000400000|user1|OMEGALUL
+1700000400100|user2|KEKW
+1700000400200|user3|OMEGALUL
+1700000400300|user4|KEKW
+1700000400400|user5|LUL
+1700000400500|user6|OMEGALUL

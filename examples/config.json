@@ -1,0 +1,28 @@
+{
+  "_comment": "added by [X] LLM model",
+  "buffer_duration_seconds": 300,
+  "clip_duration_seconds": 60,
+  "spike_threshold_sigma": 3.0,
+  "keywords": {
+    "wins": {
+      "keywords": ["W", "pog", "clutch", "insane", "ez", "gg", "wp"],
+      "weight": 1.0
+    },
+    "losses": {
+      "keywords": ["L", "ff", "sad", "rip", "unlucky", "oof"],
+      "weight": 1.0
+    },
+    "hype": {
+      "keywords": ["OMEGALUL", "KEKW", "PogChamp", "monkaS", "OMEGALUL", "LUL"],
+      "weight": 0.8
+    }
+  },
+  "fuzzy_tolerance": 0.8,
+  "weights": {
+    "spike": 0.4,
+    "keyword": 0.5,
+    "uniqueness": 0.1
+  },
+  "min_clip_score": 0.7,
+  "clip_cooldown_seconds": 30
+}
