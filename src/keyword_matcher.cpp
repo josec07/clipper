@@ -87,9 +87,13 @@ double KeywordMatcher::calculateSimilarity(const std::string& a, const std::stri
     if (a.empty() && b.empty()) return 1.0;
     if (a.empty() || b.empty()) return 0.0;
     
-    int distance = levenshteinDistance(a, b);
-    int maxLen = std::max(a.size(), b.size());
-    return 1.0 - (static_cast<double>(distance) / maxLen);
+    // Normalize inputs to handle case and repeated characters consistently
+    std::string normA = normalize(a);
+    std::string normB = normalize(b);
+    
+    int distance = levenshteinDistance(normA, normB);
+    int maxLen = std::max(normA.size(), normB.size());
+    return maxLen == 0 ? 1.0 : 1.0 - (static_cast<double>(distance) / maxLen);
 }
 
 // Ref: Text normalization - see docs/REFERENCES.md "Text Normalization"

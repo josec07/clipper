@@ -28,7 +28,18 @@ $(OBJDIR)/main.o: main.cpp
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 
-# Test target
+CURL_LIBS = $(shell pkg-config --libs libcurl)
+JSON_LIBS = $(shell pkg-config --libs nlohmann_json 2>/dev/null || echo "")
+
+TWITCH_IRC = $(BINDIR)/twitch_irc
+TWITCH_VOD = $(BINDIR)/twitch_vod_chat
+
+twitch_irc: directories
+	$(CXX) $(CXXFLAGS) -o $(TWITCH_IRC) src/twitch_irc.cpp
+
+twitch_vod: directories
+	$(CXX) $(CXXFLAGS) -o $(TWITCH_VOD) src/twitch_vod_chat.cpp $(CURL_LIBS)
+
 test: all
 	@echo "Running tests..."
 	./$(TARGET) --test

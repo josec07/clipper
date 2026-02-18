@@ -106,8 +106,8 @@ void runTests() {
     // Test 1: Levenshtein Distance
     std::cout << "Test 1: Levenshtein Distance\n";
     KeywordMatcher matcher;
-    std::string t1 = "LL";
-    std::string t2 = "LLLLL";
+    std::string t1 = "W";
+    std::string t2 = "WW";
     double sim1 = matcher.calculateSimilarity(t1,t2); // Will be calculated via match
     std::cout << "  Similarity 'L' vs 'L': " << sim1 << "\n\n";
     

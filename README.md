@@ -24,8 +24,8 @@ Perfect for streamers who want to auto-generate TikTok-ready 30-60 second clips 
 ## Quick Start
 
 ```bash
-# Build
-make
+# Build all tools
+make all
 
 # Run tests
 ./bin/chatclipper --test
@@ -35,6 +35,46 @@ make
 
 # Pipe from IRC tool or chat bot
 tail -f chat_log.txt | ./bin/chatclipper --stdin
+```
+
+## Tools
+
+### chatclipper
+Core analysis engine for detecting clip-worthy moments from chat data.
+
+### twitch_vod_chat
+Download chat history from any Twitch VOD:
+
+```bash
+# Build
+make twitch_vod
+
+# Download chat from VOD
+./bin/twitch_vod_chat --video 2699618601 --output chat.json
+
+# Pipe directly to analyzer
+./bin/twitch_vod_chat --video 2699618601 | ./bin/chatclipper
+```
+
+### twitch_irc
+Connect to live Twitch IRC for real-time analysis:
+
+```bash
+make twitch_irc
+./bin/twitch_irc --channel tfue --continuous
+```
+
+## Full Pipeline Example
+
+```bash
+# 1. Download chat from a VOD
+./bin/twitch_vod_chat --video 2699618601 --output chat.json
+
+# 2. Analyze for clip moments
+./bin/chatclipper --file chat.json
+
+# Or pipe directly:
+./bin/twitch_vod_chat --video 2699618601 | ./bin/chatclipper
 ```
 
 ## Architecture
@@ -156,7 +196,7 @@ make clean        # Clean build artifacts
 
 ## License
 
-MIT License - See LICENSE file
+GNU General Public License v3.0 - See LICENSE file
 
 ## Contributing
 

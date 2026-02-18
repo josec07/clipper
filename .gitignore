@@ -1,0 +1,6 @@
+.env
+*.o
+bin/
+build/
+*.json
+docs/copies/*.pdf
