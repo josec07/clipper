@@ -1,25 +1,24 @@
-# added by [X] LLM model
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I./include -O2
-SRCDIR = src
+CXXFLAGS = -std=c++17 -Wall -Wextra -I./include/core -I./include/tools -O2
 OBJDIR = build
 BINDIR = bin
 
-LIB_SOURCES = $(filter-out $(SRCDIR)/twitch_irc.cpp $(SRCDIR)/twitch_vod_chat.cpp, $(wildcard $(SRCDIR)/*.cpp))
-LIB_OBJECTS = $(LIB_SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+CORE_SOURCES = $(wildcard src/core/*.cpp)
+CORE_OBJECTS = $(CORE_SOURCES:src/core/%.cpp=$(OBJDIR)/core/%.o)
+
 TARGET = $(BINDIR)/chatclipper
 
-.PHONY: all clean directories
+.PHONY: all clean directories twitch_irc twitch_vod test
 
 all: directories $(TARGET)
 
 directories:
-	@mkdir -p $(OBJDIR) $(BINDIR)
+	@mkdir -p $(OBJDIR)/core $(BINDIR)
 
-$(TARGET): $(LIB_OBJECTS) $(OBJDIR)/main.o
+$(TARGET): $(CORE_OBJECTS) $(OBJDIR)/main.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/core/%.o: src/core/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJDIR)/main.o: main.cpp
@@ -29,16 +28,12 @@ clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 
 CURL_LIBS = $(shell pkg-config --libs libcurl)
-JSON_LIBS = $(shell pkg-config --libs nlohmann_json 2>/dev/null || echo "")
-
-TWITCH_IRC = $(BINDIR)/twitch_irc
-TWITCH_VOD = $(BINDIR)/twitch_vod_chat
 
 twitch_irc: directories
-	$(CXX) $(CXXFLAGS) -o $(TWITCH_IRC) src/twitch_irc.cpp
+	$(CXX) $(CXXFLAGS) -o $(BINDIR)/twitch_irc src/tools/twitch_irc.cpp
 
 twitch_vod: directories
-	$(CXX) $(CXXFLAGS) -o $(TWITCH_VOD) src/twitch_vod_chat.cpp $(CURL_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(BINDIR)/twitch_vod_chat src/tools/twitch_vod_chat.cpp $(CURL_LIBS)
 
 test: all
 	@echo "Running tests..."

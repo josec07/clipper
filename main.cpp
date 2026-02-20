@@ -1,15 +1,14 @@
-// added by [X] LLM model
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <chrono>
 #include <iomanip>
-#include "include/chat_types.h"
-#include "include/chat_buffer.h"
-#include "include/spike_detector.h"
-#include "include/keyword_matcher.h"
-#include "include/scoring_engine.h"
-#include "include/clip_detector.h"
+#include "chat_types.h"
+#include "chat_buffer.h"
+#include "spike_detector.h"
+#include "keyword_matcher.h"
+#include "scoring_engine.h"
+#include "clip_detector.h"
 
 using namespace chatclipper;
 

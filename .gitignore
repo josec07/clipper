@@ -1,6 +1,13 @@
-.env
-*.o
+# Build artifacts
 bin/
 build/
+*.o
+
+# Secrets
+.env
+
+# Test/output data
 *.json
-docs/copies/*.pdf
+
+# Documentation copies (PDFs, generated docs)
+docs/copies/

@@ -1,4 +1,3 @@
-# added by [X] LLM model
 # ChatClipper
 
 A lightweight C++ CLI tool for real-time chat signal processing and automatic stream highlight detection. Optimized for gaming streams with 2,000+ viewers.
@@ -12,8 +11,24 @@ ChatClipper processes live chat messages in real-time and emits clip-worthy time
 
 Perfect for streamers who want to auto-generate TikTok-ready 30-60 second clips from their gaming streams.
 
+## Quick Start
+
+```bash
+# Build all tools
+make all
+
+# Connect to any Twitch channel instantly (no auth required!)
+./bin/twitch_irc --channel nickmercs --continuous
+
+# Pipe live chat to clip detection
+./bin/twitch_irc --channel nickmercs --continuous | ./bin/chatclipper
+```
+
+**That's it.** No OAuth tokens. No app registration. No setup. Just works.
+
 ## Features
 
+- **Zero-setup IRC**: Connect to Twitch chat anonymously - no auth required
 - **Real-time processing**: <50ms latency per message
 - **Memory efficient**: Only holds 3-5 minutes of chat context (~300 KB)
 - **Configurable**: JSON-based keyword and scoring configuration
@@ -21,34 +36,33 @@ Perfect for streamers who want to auto-generate TikTok-ready 30-60 second clips 
 - **CLI-first**: Simple stdin/file input, JSON output
 - **No ML required**: Lightweight rule-based detection
 
-## Quick Start
-
-```bash
-# Build all tools
-make all
-
-# Run tests
-./bin/chatclipper --test
-
-# Process sample chat log
-./bin/chatclipper --file examples/sample_chat.txt
-
-# Pipe from IRC tool or chat bot
-tail -f chat_log.txt | ./bin/chatclipper --stdin
-```
-
 ## Tools
 
-### chatclipper
-Core analysis engine for detecting clip-worthy moments from chat data.
+### twitch_irc (Live Chat)
 
-### twitch_vod_chat
+Connect to any Twitch channel in real-time. **No authentication required.**
+
+```bash
+# Connect to a channel (anonymous, read-only)
+./bin/twitch_irc --channel nickmercs --continuous
+
+# Output format: timestamp_ms|username|message
+# 1771615869981|user1|hello
+# 1771615870141|user2|PogChamp
+```
+
+**Anonymous mode** uses `justinfanXXXXX` accounts - no OAuth, no app registration, works instantly. Read-only (can't send messages).
+
+**Authenticated mode** (optional, for sending messages):
+```bash
+./bin/twitch_irc --channel tfue --oauth "oauth:your_token" --username "your_username" --continuous
+```
+
+### twitch_vod_chat (VOD Chat)
+
 Download chat history from any Twitch VOD:
 
 ```bash
-# Build
-make twitch_vod
-
 # Download chat from VOD
 ./bin/twitch_vod_chat --video 2699618601 --output chat.json
 
@@ -56,25 +70,39 @@ make twitch_vod
 ./bin/twitch_vod_chat --video 2699618601 | ./bin/chatclipper
 ```
 
-### twitch_irc
-Connect to live Twitch IRC for real-time analysis:
+### chatclipper (Analysis Engine)
+
+Core analysis engine for detecting clip-worthy moments:
 
 ```bash
-make twitch_irc
-./bin/twitch_irc --channel tfue --continuous
+# Analyze a chat file
+./bin/chatclipper --file chat.log
+
+# Live analysis from IRC
+./bin/twitch_irc --channel nickmercs --continuous | ./bin/chatclipper
 ```
 
-## Full Pipeline Example
+## Full Pipeline Examples
 
+### Live Stream Monitoring
 ```bash
-# 1. Download chat from a VOD
+# Watch live chat and detect clips in real-time
+./bin/twitch_irc --channel nickmercs --continuous | ./bin/chatclipper
+```
+
+### VOD Analysis
+```bash
+# Download VOD chat and find highlights
+./bin/twitch_vod_chat --video 2699618601 | ./bin/chatclipper
+```
+
+### Save Chat for Later
+```bash
+# Download chat to file
 ./bin/twitch_vod_chat --video 2699618601 --output chat.json
 
-# 2. Analyze for clip moments
+# Analyze later
 ./bin/chatclipper --file chat.json
-
-# Or pipe directly:
-./bin/twitch_vod_chat --video 2699618601 | ./bin/chatclipper
 ```
 
 ## Architecture
@@ -86,6 +114,19 @@ ChatClipper consists of 5 core components:
 3. **KeywordMatcher**: Fuzzy keyword matching using Levenshtein distance
 4. **ScoringEngine**: Weighted score combining signals
 5. **ClipDetector**: Emits clip events with 60s window (30s lookback + 30s forward)
+
+## Project Structure
+
+```
+├── src/
+│   ├── core/           # Library code (algorithms, processing)
+│   └── tools/          # Standalone binaries (twitch_irc, twitch_vod_chat)
+├── include/
+│   ├── core/           # Library headers
+│   └── tools/          # Tool headers
+├── main.cpp            # chatclipper entry point
+└── Makefile
+```
 
 ## Input Format
 
@@ -136,6 +177,36 @@ Edit `examples/config.json` to customize:
 }
 ```
 
+## Building
+
+Requirements:
+- C++17 compatible compiler
+- Make
+- libcurl (for VOD chat downloader)
+- nlohmann_json (for JSON parsing)
+
+```bash
+make all            # Build all tools
+make twitch_irc     # Build IRC tool only
+make twitch_vod     # Build VOD downloader only
+make clean          # Clean build artifacts
+```
+
+## Usage
+
+```bash
+# twitch_irc - Live chat connection
+./bin/twitch_irc --channel nickmercs --continuous           # Anonymous (recommended)
+./bin/twitch_irc --channel tfue --oauth "oauth:xxx" --username "user"  # Authenticated
+
+# twitch_vod_chat - VOD chat download
+./bin/twitch_vod_chat --video 2699618601 --output chat.json
+
+# chatclipper - Analysis
+./bin/chatclipper --file chat.log
+./bin/chatclipper --test
+```
+
 ## References
 
 This project implements algorithms from:
@@ -143,8 +214,6 @@ This project implements algorithms from:
 - Ringer et al. (2020) - TwitchChat dataset research
 - Ringer (2022) - Multi-modal livestream highlight detection
 - Barbieri et al. (2017) - Twitch emote modeling
-
-See `docs/literature/` for full citations and `docs/REFERENCES.md` for comprehensive algorithm documentation and academic attribution.
 
 ### Academic Attribution
 
@@ -155,37 +224,7 @@ All algorithms implemented in this project are properly cited with academic refe
 - **Online Variance**: Welford (1962)
 - **Circular Buffer**: Standard CS literature
 
-See `docs/REFERENCES.md` for complete citations.
-
-## Building
-
-Requirements:
-- C++17 compatible compiler
-- Make
-
-```bash
-make              # Build release version
-make clean        # Clean build artifacts
-```
-
-## Usage
-
-```bash
-# Help
-./bin/chatclipper --help
-
-# Read from stdin (default)
-./bin/chatclipper
-
-# Read from file
-./bin/chatclipper --file chat.log
-
-# With custom config
-./bin/chatclipper --config my_config.json --file chat.log
-
-# Run tests
-./bin/chatclipper --test
-```
+See `docs/literature/` for citation files (.bib).
 
 ## Use Cases
 
@@ -193,6 +232,7 @@ make clean        # Clean build artifacts
 - **Stream highlights**: Mark timestamps for later review
 - **Analytics**: Track viewer engagement spikes
 - **Integration**: Use as backend for OBS dock or web service
+- **Chat logging**: Record chat for archival or analysis
 
 ## License
 
@@ -202,7 +242,7 @@ GNU General Public License v3.0 - See LICENSE file
 
 This is a focused open-source project. Contributions welcome for:
 - Additional keyword categories
-- Platform adapters (Twitch IRC, YouTube chat)
+- Platform adapters (YouTube chat, Discord)
 - Performance optimizations
 - Integration examples
 
