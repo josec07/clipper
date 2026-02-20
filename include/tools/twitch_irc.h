@@ -23,6 +23,7 @@ public:
     bool isConnected() const;
     
     bool authenticate(const std::string& oauth, const std::string& username);
+    bool authenticateAnonymous();
     bool joinChannel(const std::string& channel);
     
     std::optional<IRCMessage> readMessage(int timeoutMs = 30000);

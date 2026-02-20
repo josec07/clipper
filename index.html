@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>type43 | Data Processing Tools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #fafafa;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+        }
+        header {
+            margin-bottom: 4rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        .tools {
+            margin-bottom: 4rem;
+        }
+        .tool {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .tool:hover {
+            border-color: #ccc;
+        }
+        .tool h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .tool p {
+            color: #555;
+            margin-bottom: 1rem;
+        }
+        .tool-links {
+            display: flex;
+            gap: 1rem;
+        }
+        .tool-links a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .tool-links a:hover {
+            text-decoration: underline;
+        }
+        .badge {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        footer {
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid #e5e5e5;
+            padding-top: 2rem;
+        }
+        footer a {
+            color: #666;
+        }
+        .about {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 4rem;
+        }
+        .about p {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>type43</h1>
+            <p class="tagline">Open source data processing tools in C++ and Rust</p>
+        </header>
+
+        <section class="about">
+            <p>Lightweight, local-first tools for text stream analysis, graph processing, and data pipelines. No dependencies, no frameworks, just algorithms.</p>
+        </section>
+
+        <section class="tools">
+            <h2 style="margin-bottom: 1rem; font-size: 1rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em;">Tools</h2>
+            
+            <div class="tool">
+                <h2>ChatClipper <span class="badge">C++</span></h2>
+                <p>Streaming text analyzer for detecting patterns in chat logs. Uses spike detection, fuzzy matching, and weighted scoring to identify clip-worthy moments from Twitch VODs.</p>
+                <div class="tool-links">
+                    <a href="https://github.com/jgcaudillojr/type43">GitHub</a>
+                    <a href="https://github.com/jgcaudillojr/type43/blob/main/README.md">Docs</a>
+                </div>
+            </div>
+
+        </section>
+
+        <footer>
+            <p>Built by <a href="https://jgcaudillojr.com">Jose G Caudillo Jr</a></p>
+        </footer>
+    </div>
+</body>
+</html>
