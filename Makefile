@@ -5,8 +5,8 @@ SRCDIR = src
 OBJDIR = build
 BINDIR = bin
 
-SOURCES = $(wildcard $(SRCDIR)/*.cpp)
-OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+LIB_SOURCES = $(filter-out $(SRCDIR)/twitch_irc.cpp $(SRCDIR)/twitch_vod_chat.cpp, $(wildcard $(SRCDIR)/*.cpp))
+LIB_OBJECTS = $(LIB_SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 TARGET = $(BINDIR)/chatclipper
 
 .PHONY: all clean directories
@@ -16,7 +16,7 @@ all: directories $(TARGET)
 directories:
 	@mkdir -p $(OBJDIR) $(BINDIR)
 
-$(TARGET): $(OBJECTS) $(OBJDIR)/main.o
+$(TARGET): $(LIB_OBJECTS) $(OBJDIR)/main.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
