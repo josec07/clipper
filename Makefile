@@ -1,45 +1,19 @@
-# added by [X] LLM model
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -I./include -O2
-SRCDIR = src
-OBJDIR = build
 BINDIR = bin
 
-SOURCES = $(wildcard $(SRCDIR)/*.cpp)
-OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
-TARGET = $(BINDIR)/chatclipper
+.PHONY: all clean directories twitch_irc twitch_vod
 
-.PHONY: all clean directories
-
-all: directories $(TARGET)
+all: directories twitch_irc twitch_vod
 
 directories:
-	@mkdir -p $(OBJDIR) $(BINDIR)
-
-$(TARGET): $(OBJECTS) $(OBJDIR)/main.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-$(OBJDIR)/main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
-	rm -rf $(OBJDIR) $(BINDIR)
-
-CURL_LIBS = $(shell pkg-config --libs libcurl)
-JSON_LIBS = $(shell pkg-config --libs nlohmann_json 2>/dev/null || echo "")
-
-TWITCH_IRC = $(BINDIR)/twitch_irc
-TWITCH_VOD = $(BINDIR)/twitch_vod_chat
+	@mkdir -p $(BINDIR)
 
 twitch_irc: directories
-	$(CXX) $(CXXFLAGS) -o $(TWITCH_IRC) src/twitch_irc.cpp
+	$(CXX) $(CXXFLAGS) -o $(BINDIR)/twitch_irc src/twitch_irc.cpp
 
 twitch_vod: directories
-	$(CXX) $(CXXFLAGS) -o $(TWITCH_VOD) src/twitch_vod_chat.cpp $(CURL_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(BINDIR)/twitch_vod_chat src/twitch_vod_chat.cpp $(shell pkg-config --libs libcurl)
 
-test: all
-	@echo "Running tests..."
-	./$(TARGET) --test
+clean:
+	rm -rf $(BINDIR)

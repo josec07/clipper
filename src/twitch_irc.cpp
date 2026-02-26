@@ -8,10 +8,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <regex>
+#include <random>
 
 namespace chatclipper {
 
-TwitchIRC::TwitchIRC() : sockfd_(-1), connected_(false) {}
+TwitchIRC::TwitchIRC() : sockfd(-1), connected_(false) {}
 
 TwitchIRC::~TwitchIRC() {
     disconnect();
@@ -153,6 +154,32 @@ bool TwitchIRC::authenticate(const std::string& oauth, const std::string& userna
     return true;
 }
 
+bool TwitchIRC::authenticateAnonymous() {
+    sendCommand("CAP REQ :twitch.tv/tags twitch.tv/commands");
+    
+    if (!waitForResponse("ACK", 5000)) {
+        lastError_ = "Failed to negotiate capabilities";
+        return false;
+    }
+    
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(10000, 99999);
+    std::string justinfan = "justinfan" + std::to_string(dis(gen));
+    
+    sendCommand("PASS anything");
+    sendCommand("NICK " + justinfan);
+    
+    if (!waitForResponse("001", 10000)) {
+        if (lastError_.empty()) {
+            lastError_ = "Anonymous authentication failed - no 001 response";
+        }
+        return false;
+    }
+    
+    return true;
+}
+
 bool TwitchIRC::joinChannel(const std::string& channel) {
     std::string chan = channel;
     if (chan[0] != '#') {
@@ -279,16 +306,21 @@ void printUsage(const char* program) {
     std::cerr << "Usage: " << program << " --channel <channel> [options]\n"
               << "Options:\n"
               << "  --channel <name>   Channel to join (required)\n"
+              << "  --anonymous        Connect anonymously (read-only, no auth required)\n"
               << "  --oauth <token>    OAuth token (or set TWITCH_OAUTH env)\n"
               << "  --username <name>  Username (or set TWITCH_USERNAME env)\n"
               << "  --continuous       Keep reading messages (default: single message)\n"
               << "  --timeout <ms>     Timeout in milliseconds (default: 30000)\n"
-              << "  --help             Show this help\n";
+              << "  --help             Show this help\n"
+              << "\n"
+              << "Anonymous mode connects as justinfanXXXXX (read-only).\n"
+              << "No OAuth token or app registration required for anonymous mode.\n";
 }
 
 int main(int argc, char* argv[]) {
     std::string channel, oauth, username;
     bool continuous = false;
+    bool anonymous = false;
     int timeout = 30000;
     
     for (int i = 1; i < argc; ++i) {
@@ -304,6 +336,8 @@ int main(int argc, char* argv[]) {
             username = argv[++i];
         } else if (arg == "--continuous") {
             continuous = true;
+        } else if (arg == "--anonymous") {
+            anonymous = true;
         } else if (arg == "--timeout" && i + 1 < argc) {
             timeout = std::stoi(argv[++i]);
         }
@@ -322,12 +356,7 @@ int main(int argc, char* argv[]) {
     if (username.empty() && envUser) username = envUser;
     
     if (oauth.empty()) {
-        std::cerr << "Error: OAuth token required (--oauth or TWITCH_OAUTH env)\n";
-        return 1;
-    }
-    if (username.empty()) {
-        std::cerr << "Error: Username required (--username or TWITCH_USERNAME env)\n";
-        return 1;
+        anonymous = true;
     }
     
     chatclipper::TwitchIRC irc;
@@ -337,9 +366,22 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    if (!irc.authenticate(oauth, username)) {
-        std::cerr << "Authentication failed: " << irc.getLastError() << "\n";
-        return 1;
+    if (anonymous) {
+        std::cerr << "Connecting anonymously (read-only)...\n";
+        if (!irc.authenticateAnonymous()) {
+            std::cerr << "Anonymous authentication failed: " << irc.getLastError() << "\n";
+            return 1;
+        }
+    } else {
+        if (username.empty()) {
+            std::cerr << "Error: Username required for authenticated mode\n";
+            return 1;
+        }
+        std::cerr << "Connecting as " << username << "...\n";
+        if (!irc.authenticate(oauth, username)) {
+            std::cerr << "Authentication failed: " << irc.getLastError() << "\n";
+            return 1;
+        }
     }
     
     if (!irc.joinChannel(channel)) {

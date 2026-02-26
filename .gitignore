@@ -2,5 +2,7 @@
 *.o
 bin/
 build/
-*.json
-docs/copies/*.pdf
+*.log
+*.swp
+*.tmp
+.DS_Store
