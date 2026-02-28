@@ -1,0 +1,34 @@
+{
+  "tier": "easy",
+  "positive_high_value": [
+    "lol",
+    "lmao",
+    "ha",
+    "wow",
+    "ok",
+    "nice",
+    "gg",
+    "yeah",
+    "yes",
+    "damn",
+    "crazy",
+    "wild"
+  ],
+  "negative_high_value": [
+    "rip",
+    "oof",
+    "yikes",
+    "nah",
+    "no"
+  ],
+  "settings": {
+    "exact_match": false,
+    "levenshtein_threshold": 0.8,
+    "use_levenshtein": true,
+    "burst_threshold": 10,
+    "burst_window_seconds": 30,
+    "context_window_seconds": 120,
+    "beep_on_match": true,
+    "verbose": true
+  }
+}

@@ -6,3 +6,11 @@ build/
 *.swp
 *.tmp
 .DS_Store
+
+.outputs/
+.archive/
+*.backup
+/live-monitor
+/test-irc
+/ctic-add
+include/live-monitor/live-monitor

@@ -1,0 +1,34 @@
+{
+  "tier": "high",
+  "positive_high_value": [
+    "INSANE",
+    "CLUTCH",
+    "POGCHAMP",
+    "GIGACHAD",
+    "TRIPPLE",
+    "QUAD",
+    "PENTA",
+    "ACE",
+    "HOLY",
+    "NO WAY",
+    "ACTUALLY INSANE",
+    "LEGENDARY"
+  ],
+  "negative_high_value": [
+    "BRUH",
+    "CRINGE",
+    "UNLUCKY",
+    "SADGE",
+    "PEPEHANDS"
+  ],
+  "settings": {
+    "exact_match": false,
+    "levenshtein_threshold": 0.8,
+    "use_levenshtein": true,
+    "burst_threshold": 3,
+    "burst_window_seconds": 30,
+    "context_window_seconds": 120,
+    "beep_on_match": true,
+    "verbose": true
+  }
+}
