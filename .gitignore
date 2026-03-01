@@ -7,10 +7,14 @@ build/
 *.tmp
 .DS_Store
 
-.outputs/
+.ctic/
+.context/
 .archive/
 *.backup
 /live-monitor
 /test-irc
 /ctic-add
+/twitch-vod-chat
+/twitch-irc
+ctic-lib/test-irc
 include/live-monitor/live-monitor
