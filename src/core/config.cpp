@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <ctime>
+#include <dirent.h>
+#include <algorithm>
 
 namespace ctic {
 namespace core {
@@ -124,23 +126,23 @@ bool ConfigManager::remove_creator(const std::string& name) {
 
 std::vector<std::string> ConfigManager::list_creators() {
     std::vector<std::string> creators;
-    std::string cmd = "ls " + ctic_dir_ + "/creators/*.json 2>/dev/null | xargs -n1 basename | sed 's/.json$//'";
+    std::string creators_dir = ctic_dir_ + "/creators";
     
-    FILE* pipe = popen(cmd.c_str(), "r");
-    if (pipe) {
-        char buffer[256];
-        while (fgets(buffer, sizeof(buffer), pipe)) {
-            std::string name(buffer);
-            if (!name.empty() && name.back() == '\n') {
-                name.pop_back();
-            }
-            if (!name.empty()) {
-                creators.push_back(name);
-            }
-        }
-        pclose(pipe);
+    DIR* dir = opendir(creators_dir.c_str());
+    if (!dir) {
+        return creators;
     }
     
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        std::string filename = entry->d_name;
+        if (filename.length() > 5 && filename.substr(filename.length() - 5) == ".json") {
+            creators.push_back(filename.substr(0, filename.length() - 5));
+        }
+    }
+    
+    closedir(dir);
+    std::sort(creators.begin(), creators.end());
     return creators;
 }
 
