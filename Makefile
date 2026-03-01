@@ -10,6 +10,8 @@ SRC = src/main.cpp \
       src/core/config.cpp \
       src/core/detection.cpp \
       src/core/text.cpp \
+      src/core/chat_buffer.cpp \
+      src/core/spike_detector.cpp \
       src/providers/twitch_irc.cpp
 
 OBJ = $(SRC:.cpp=.o)
