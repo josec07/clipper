@@ -1,0 +1,30 @@
+{
+  "profile_name": "conservative",
+  "description": "Less sensitive - fewer detections but higher quality",
+  "tiers": {
+    "high": {
+      "burst_threshold": 5,
+      "min_word_length": 4,
+      "cooldown_seconds": 120,
+      "require_unique_users": 4
+    },
+    "high-negative": {
+      "burst_threshold": 7,
+      "min_word_length": 2,
+      "cooldown_seconds": 90,
+      "require_unique_users": 5
+    },
+    "medium": {
+      "burst_threshold": 12,
+      "min_word_length": 2,
+      "cooldown_seconds": 180,
+      "require_unique_users": 6
+    },
+    "easy": {
+      "burst_threshold": 20,
+      "min_word_length": 3,
+      "cooldown_seconds": 240,
+      "require_unique_users": 8
+    }
+  }
+}

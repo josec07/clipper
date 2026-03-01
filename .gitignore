@@ -6,3 +6,10 @@ build/
 *.swp
 *.tmp
 .DS_Store
+
+.ctic/
+.context/
+*.backup
+
+/ctic
+/tests/test_runner

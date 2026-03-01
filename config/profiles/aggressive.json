@@ -1,0 +1,30 @@
+{
+  "profile_name": "aggressive",
+  "description": "Highly sensitive - catches more moments but more false positives",
+  "tiers": {
+    "high": {
+      "burst_threshold": 2,
+      "min_word_length": 2,
+      "cooldown_seconds": 30,
+      "require_unique_users": 1
+    },
+    "high-negative": {
+      "burst_threshold": 3,
+      "min_word_length": 1,
+      "cooldown_seconds": 30,
+      "require_unique_users": 2
+    },
+    "medium": {
+      "burst_threshold": 5,
+      "min_word_length": 1,
+      "cooldown_seconds": 60,
+      "require_unique_users": 2
+    },
+    "easy": {
+      "burst_threshold": 10,
+      "min_word_length": 1,
+      "cooldown_seconds": 90,
+      "require_unique_users": 3
+    }
+  }
+}

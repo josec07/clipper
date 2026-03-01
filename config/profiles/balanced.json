@@ -1,0 +1,30 @@
+{
+  "profile_name": "balanced",
+  "description": "Good for variety streamers - balanced between sensitivity and noise",
+  "tiers": {
+    "high": {
+      "burst_threshold": 3,
+      "min_word_length": 3,
+      "cooldown_seconds": 60,
+      "require_unique_users": 2
+    },
+    "high-negative": {
+      "burst_threshold": 5,
+      "min_word_length": 1,
+      "cooldown_seconds": 45,
+      "require_unique_users": 3
+    },
+    "medium": {
+      "burst_threshold": 8,
+      "min_word_length": 1,
+      "cooldown_seconds": 90,
+      "require_unique_users": 4
+    },
+    "easy": {
+      "burst_threshold": 15,
+      "min_word_length": 2,
+      "cooldown_seconds": 120,
+      "require_unique_users": 5
+    }
+  }
+}

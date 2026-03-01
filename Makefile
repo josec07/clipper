@@ -1,19 +1,36 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I./include -O2
-BINDIR = bin
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2
+INCLUDES = -I./include
+LDFLAGS = 
 
-.PHONY: all clean directories twitch_irc twitch_vod
+TARGET = ctic
 
-all: directories twitch_irc twitch_vod
+SRC = src/main.cpp \
+      src/cli/commands.cpp \
+      src/core/config.cpp \
+      src/core/detection.cpp \
+      src/core/text.cpp \
+      src/core/chat_buffer.cpp \
+      src/core/spike_detector.cpp \
+      src/core/monitor.cpp \
+      src/core/monitor_pool.cpp \
+      src/providers/twitch_irc.cpp
 
-directories:
-	@mkdir -p $(BINDIR)
+OBJ = $(SRC:.cpp=.o)
 
-twitch_irc: directories
-	$(CXX) $(CXXFLAGS) -o $(BINDIR)/twitch_irc src/twitch_irc.cpp
+all: $(TARGET)
 
-twitch_vod: directories
-	$(CXX) $(CXXFLAGS) -o $(BINDIR)/twitch_vod_chat src/twitch_vod_chat.cpp $(shell pkg-config --libs libcurl)
+$(TARGET): $(OBJ)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 clean:
-	rm -rf $(BINDIR)
+	rm -f $(TARGET) $(OBJ) src/*/*.o
+
+test: $(TARGET)
+	./$(TARGET) --help
+	./$(TARGET) list
+
+.PHONY: all clean test

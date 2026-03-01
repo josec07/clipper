@@ -1,172 +1,279 @@
-# added by [X] LLM model
-# Twitch Chat CLI
+# CTIC - Chat Twitch Intelligence CLI
 
-A lightweight C++ CLI tool for connecting to Twitch chat - both live IRC and VOD chat downloads. Zero setup required for read-only access.
+A terminal-based service for detecting clip-worthy moments from Twitch chat using burst detection and Z-score anomaly analysis. Zero setup required for read-only access.
 
 ## Quick Start
 
 ```bash
-# Build the tools
-make all
+# Build
+make
 
-# Connect to any Twitch channel live (no auth required!)
-./bin/twitch_irc --channel shroud --continuous
+# Add a creator to monitor
+./ctic add https://twitch.tv/xqc
 
-# Download chat from a VOD
-./bin/twitch_vod_chat --video 1234567890 --output chat.json
+# Start monitoring all creators
+./ctic run
 ```
 
-**No OAuth tokens. No app registration. Just works.**
+**No OAuth tokens. No app registration. Multi-creator support. Just works.**
 
 ## Features
 
 - **Zero-setup IRC**: Connect anonymously to any Twitch channel
-- **Live chat**: Real-time message streaming with <50ms latency
-- **VOD chat**: Download complete chat history from any video
-- **Simple output**: Pipe-delimited format perfect for scripting
-- **Lightweight**: Single binary, no dependencies for IRC tool
+- **Multi-creator monitoring**: Simultaneous monitoring with thread pool
+- **Burst detection**: Detect hype moments via Levenshtein similarity
+- **Z-score spike detection**: Statistical anomaly detection with Welford's algorithm
+- **Tiered detection**: High (rare), Medium (moderate), Easy (common) word lists
+- **CSV output**: Full metadata logging with traceability
+- **State tracking**: JSON state file for session management
 
-## Tools
+## Installation
 
-### twitch_irc
+### Requirements
 
-Connect to live Twitch chat in real-time.
-
-```bash
-# Anonymous mode (read-only, recommended)
-./bin/twitch_irc --channel xqc --continuous
-
-# Authenticated mode (for sending messages)
-./bin/twitch_irc --channel xqc --oauth "oauth:your_token" --username "your_name" --continuous
-```
-
-**Output format:** `timestamp|username|message`
-```
-1700000000000|user1|Hello chat
-1700000000100|user2|PogChamp
-1700000000200|user3|GG
-```
-
-**Options:**
-- `--channel <name>` - Channel to join (required)
-- `--anonymous` - Connect anonymously (default if no oauth)
-- `--oauth <token>` - OAuth token (or set TWITCH_OAUTH env)
-- `--username <name>` - Username (or set TWITCH_USERNAME env)
-- `--continuous` - Keep reading messages
-- `--timeout <ms>` - Timeout in milliseconds (default: 30000)
-
-### twitch_vod_chat
-
-Download chat history from any Twitch VOD.
-
-```bash
-# Download chat to JSON file
-./bin/twitch_vod_chat --video 1234567890 --output chat.json
-
-# Stream chat to stdout
-./bin/twitch_vod_chat --video 1234567890
-```
-
-**Options:**
-- `--video <id>` - Twitch video ID (required)
-- `--output <file>` - Output file (optional, defaults to stdout)
-
-## Building
-
-Requirements:
 - C++17 compatible compiler (g++ or clang++)
 - Make
-- libcurl (for VOD chat downloader)
-- pkg-config
+- POSIX sockets (Linux/macOS)
+
+### Build
 
 ```bash
-# Build both tools
-make all
+# Build the CLI
+make
 
-# Build IRC tool only
-make twitch_irc
-
-# Build VOD tool only
-make twitch_vod
-
-# Clean build artifacts
-make clean
+# Build and run tests
+cd tests && make && ./test_runner
 ```
 
-## Examples
+## Commands
 
-### Live Stream Monitoring
+### `ctic add <url>`
+
+Add a creator to monitor. Tests connection for 30 seconds before saving.
+
 ```bash
-# Watch chat in real-time
-./bin/twitch_irc --channel shroud --continuous
-
-# Filter for specific keywords
-./bin/twitch_irc --channel shroud --continuous | grep -i "win\|pog"
-
-# Save to file with timestamps
-./bin/twitch_irc --channel shroud --continuous > chat_$(date +%Y%m%d).log
+./ctic add https://twitch.tv/xqc
+./ctic add xqc                    # Also accepts channel name
 ```
 
-### VOD Analysis
-```bash
-# Download and analyze chat
-./bin/twitch_vod_chat --video 1234567890 | jq '.comments | length'
+Output:
+- Saves config to `.ctic/creators/xqc.json`
+- Creates output folders `.ctic/outputs/xqc/{high,medium,easy}/`
 
-# Get messages per minute
-./bin/twitch_vod_chat --video 1234567890 | jq '.comments | group_by(.content_offset_seconds / 60 | floor) | map(length)'
+### `ctic list`
+
+List all configured creators.
+
+```bash
+./ctic list
 ```
 
-### Pipeline Examples
-```bash
-# Live chat → file with timestamps
-./bin/twitch_irc --channel shroud --continuous | tee chat.log
+### `ctic status [name]`
 
-# VOD chat → pretty print
-./bin/twitch_vod_chat --video 1234567890 | jq '.comments[] | "\(.commenter.display_name): \(.message.body)"'
+Test connection to all creators or a specific one.
+
+```bash
+./ctic status                 # Test all
+./ctic status xqc             # Test specific
 ```
 
-## Anonymous Mode
+### `ctic run`
 
-The IRC tool can connect anonymously using Twitch's `justinfanXXXXX` accounts. This requires:
-- **No OAuth token**
-- **No app registration**
-- **No setup**
+Start monitoring all configured creators simultaneously. Each creator runs in a separate thread.
 
-Simply run without credentials:
 ```bash
-./bin/twitch_irc --channel <any_channel> --continuous
+./ctic run
 ```
 
-**Limitations:** Read-only (cannot send messages)
+Output:
+- CSV logs to `.ctic/outputs/{creator}/{tier}/matches-*.csv`
+- State saved to `.ctic/state.json`
+- Press Ctrl+C to stop all monitors
 
-## Authentication (Optional)
+### `ctic remove <name>`
 
-For sending messages, get an OAuth token from https://twitchtokengenerator.com or https://twitchapps.com/tmi/
+Remove a creator from monitoring.
 
 ```bash
-export TWITCH_OAUTH="oauth:your_token_here"
-export TWITCH_USERNAME="your_username"
-./bin/twitch_irc --channel shroud --continuous
+./ctic remove xqc
 ```
 
 ## Architecture
 
-Both tools use native system sockets:
-- **IRC**: Direct TCP socket connection to `irc.chat.twitch.tv:6667`
-- **VOD**: HTTP requests via libcurl to Twitch's GraphQL API
+```
+┌─────────────────────────────────────────────────────┐
+│  CLI Layer (src/cli/commands.cpp)                   │
+└─────────────────────┬───────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────┐
+│  Core Layer (src/core/)                             │
+│  ├── MonitorPool      → Thread pool management      │
+│  ├── Monitor          → Per-creator monitoring      │
+│  ├── ChatBuffer       → Time-based sliding windows │
+│  ├── SpikeDetector    → Z-score anomaly detection   │
+│  ├── Detector         → Burst detection logic       │
+│  ├── text.cpp         → Levenshtein similarity      │
+│  └── config.cpp       → Config management            │
+└─────────────────────┬───────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────┐
+│  Provider Layer (src/providers/)                    │
+│  ├── twitch_irc.cpp   → IRC socket connection       │
+│  └── twitch_url.h     → URL parsing (header-only)   │
+└─────────────────────────────────────────────────────┘
+```
+
+## Detection
+
+### Burst Detection
+
+Detects when multiple similar words appear in a time window using Levenshtein distance:
+
+```
+Message: "POG"
+Message: "POGGG"     ← 85% similar to "POG"
+Message: "POG"      ← 100% match
+→ BURST DETECTED (threshold: 3 in 30s)
+```
+
+### Z-Score Spike Detection
+
+Uses Welford's online variance algorithm to detect abnormal message rates:
+
+```
+Baseline: 5 msg/sec
+Current:  25 msg/sec
+Z-score:  4.0σ
+→ SPIKE DETECTED
+```
+
+### Tiers
+
+| Tier | Words | Threshold | Use Case |
+|------|-------|-----------|----------|
+| **High** | INSANE, CLUTCH, POGCHAMP, ACE, PENTA | 3 messages | Rare viral moments |
+| **Medium** | W, POG, GGS, NICE, LETS GO | 5 messages | Moderate hype |
+| **Easy** | lol, wow, nice, gg, crazy | 10 messages | Common engagement |
+
+## Output
+
+### CSV Format
+
+`.ctic/outputs/{creator}/{tier}/matches-*.csv`:
+
+```csv
+timestamp,matched_word,sentiment,burst_count,spike_z_score,users_matched,spike_intensity,config_id,sample_messages
+2026-02-28T12:34:02Z,INSANE,positive,3,4,4,0.80,default,"user1: INSANE | user2: insane | user3: INSANITY"
+```
+
+### State File
+
+`.ctic/state.json`:
+
+```json
+{
+  "xqc": {
+    "creator_name": "xqc",
+    "running": false,
+    "connected": false,
+    "messages_processed": 1523,
+    "bursts_detected": 7
+  }
+}
+```
+
+### Creator Config
+
+`.ctic/creators/xqc.json`:
+
+```json
+{
+  "name": "xqc",
+  "channel": "xqc",
+  "twitch_url": "https://twitch.tv/xqc",
+  "enabled_tiers": ["high", "medium", "easy"],
+  "detector_config": "default",
+  "total_sessions": 5,
+  "total_clips_detected": 127
+}
+```
+
+## Testing
+
+```bash
+cd tests
+make test              # Run all tests
+make test_text         # Run text processing tests
+make test_detector     # Run burst detection tests
+make test_spike        # Run spike detector tests
+```
+
+Current coverage: **133 assertions in 33 test cases**
+
+## Project Structure
+
+```
+.
+├── ctic                      ← Compiled binary
+├── Makefile
+│
+├── src/
+│   ├── main.cpp
+│   ├── cli/commands.cpp
+│   ├── core/
+│   │   ├── monitor.cpp
+│   │   ├── monitor_pool.cpp
+│   │   ├── chat_buffer.cpp
+│   │   ├── spike_detector.cpp
+│   │   ├── detection.cpp
+│   │   ├── text.cpp
+│   │   └── config.cpp
+│   └── providers/
+│       └── twitch_irc.cpp
+│
+├── include/
+│   ├── CLI11.hpp
+│   ├── cli/
+│   ├── core/
+│   └── providers/
+│
+├── tests/
+│   ├── catch_amalgamated.hpp
+│   ├── test_text.cpp
+│   ├── test_url.cpp
+│   ├── test_spike_detector.cpp
+│   ├── test_detector.cpp
+│   └── test_config.cpp
+│
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── INDEX.md
+│   └── REFERENCES.md
+│
+└── .ctic/                    ← Created at runtime
+    ├── creators/*.json
+    ├── outputs/{creator}/{tier}/*.csv
+    └── state.json
+```
+
+## Documentation
+
+- `docs/ARCHITECTURE.md` - Technical architecture guide
+- `docs/INDEX.md` - Algorithm reference index
+- `docs/REFERENCES.md` - Academic citations
+
+## References
+
+This project implements algorithms from the following research:
+
+- **Levenshtein Distance**: Levenshtein, V. I. (1966). "Binary codes capable of correcting deletions, insertions, and reversals"
+- **Welford's Algorithm**: Welford, B. P. (1962). "Note on a method for calculating corrected sums of squares and products"
+- **Z-Score Anomaly Detection**: Standard statistical outlier detection
 
 ## License
 
 GNU General Public License v3.0 - See LICENSE file
 
-## Contributing
-
-Contributions welcome for:
-- Additional output formats
-- Platform support (macOS, Windows)
-- Performance optimizations
-- Integration examples
-
 ---
 
-*Built for streamers, chat bots, and data enthusiasts.*
+*Built for clippers, streamers, and chat analysts.*
